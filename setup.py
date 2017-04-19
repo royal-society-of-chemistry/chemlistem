@@ -7,8 +7,8 @@ setup(
 		package_data={'':['*.txt','*.h5','*.json']},
 		author="Peter Corbett",
 		author_email="corbettp@rsc.org",
-		url="http://www.example.com/chemilistem/",
-		download_url="http://www.example.com/chemilistem/tarball/chemlistem.tar.gz",
+		url="https://bitbucket.org/rscapplications/chemlistem",
+		download_url="https://bitbucket.org/rscapplications/chemlistem/downloads/ChemListem-0.0.1-py3-none-any.whl",
 		license="MIT",
-		install_requires=['keras', 'scikit-learn', 'numpy']
+		install_requires=['keras', 'scikit-learn', 'numpy', 'tensorflow']
 )
