@@ -1,0 +1,2 @@
+/chemlistem/default_tradmodel.h5 filter=lfs diff=lfs merge=lfs -text
+/chemlistem/default_tradmodel.json filter=lfs diff=lfs merge=lfs -text
