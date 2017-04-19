@@ -14,7 +14,11 @@ If you have obtained a .whl file, then it can be installed using `pip`, e.g.
 
     pip install /path/to/ChemListem-0.0.1-py3-none-any.whl
 
-ChemListem will be made available for installation from the PyPI soon.
+Alternatively you can use pip to fetch and install chemlistem in one single action:
+
+    pip install https://bitbucket.org/rscapplications/chemlistem/downloads/ChemListem-0.0.1-py3-none-any.whl
+
+ChemListem will be made available for installation from the PyPI soon. 
 
 If you wish to build the .whl file from source, run:
    
