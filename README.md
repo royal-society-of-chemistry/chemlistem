@@ -168,9 +168,9 @@ from the paper) and the traditional model gave an F of 0.8725 (c.f. 0.8707 from 
 
 ## Conclusion
 
-ChemListem has been 
+ChemListem has been developed by the Data Science group at the Royal Society of Chemistry.
 
-ChemListem is distributed under the ??? License - see License.txt.
+ChemListem is distributed under the MIT License - see License.txt.
 
 There is a paper describing ChemListem - *Chemlistem - chemical named entity recognition using recurrent neural network* - to be
 published as part of the BioCreative V.5 proceedings. If you use chemlistem in your work, please cite it.
