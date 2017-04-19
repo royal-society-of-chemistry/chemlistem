@@ -18,7 +18,7 @@ ChemListem will be made available for installation from the PyPI soon.
 
 If you wish to build the .whl file from source, run:
    
-   python setup.py bdist_wheel
+    python setup.py bdist_wheel
 
 ### Installing dependencies
 
