@@ -10,20 +10,10 @@ on Windows 10, and Ubuntu 14.
 
 ## Installation
 
-If you have obtained a .whl file, then it can be installed using `pip`, e.g.
+ChemListem may be installed from the PyPI via pip:
 
-    pip install /path/to/ChemListem-0.0.1-py3-none-any.whl
-
-Alternatively you can use pip to fetch and install chemlistem in one single action:
-
-    pip install https://bitbucket.org/rscapplications/chemlistem/downloads/ChemListem-0.0.1-py3-none-any.whl
-
-ChemListem will be made available for installation from the PyPI soon. 
-
-If you wish to build the .whl file from source, run:
-   
-    python setup.py bdist_wheel
-
+	pip install chemlistem
+	
 ### Installing dependencies
 
 The dependencies for ChemListem can sometimes be hard to install, especially on Windows. Keras depends upon either 

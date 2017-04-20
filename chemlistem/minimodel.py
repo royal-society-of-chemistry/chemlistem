@@ -16,7 +16,7 @@ from keras.models import Model, load_model
 import keras.regularizers
 import numpy as np
 
-from .utils import tobits, sobie_scores_to_char_ents
+from .utils import tobits, sobie_scores_to_char_ents, get_file
 from .corpusreader import CorpusReader
 
 charstr = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789.,-[](){};:'\"^$%=/\\<>@_*+?! "
@@ -35,7 +35,8 @@ def get_mini_model():
 	global defaultmodel
 	if defaultmodel is not None: return defaultmodel
 	mm = MiniModel()
-	mm.load(os.path.join(os.path.split(__file__)[0], "default_minimodel.h5"))
+	f = get_file("default_minimodel_0.0.1.h5")
+	mm.load(f)
 	defaultmodel = mm
 	return defaultmodel
 
