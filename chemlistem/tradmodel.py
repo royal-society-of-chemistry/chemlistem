@@ -21,7 +21,7 @@ from datetime import datetime
 
 from .featurizer import Featurizer
 from chemtok import ChemTokeniser
-from .utils import tobits, sobie_scores_to_char_ents
+from .utils import tobits, sobie_scores_to_char_ents, get_file
 from .corpusreader import CorpusReader
 
 defaultmodel = None
@@ -36,8 +36,9 @@ def get_trad_model():
 	global defaultmodel
 	if defaultmodel is not None: return defaultmodel
 	tm = TradModel()
-	tm.load(os.path.join(os.path.split(__file__)[0], "default_tradmodel.json"),
-		os.path.join(os.path.split(__file__)[0], "default_tradmodel.h5"))
+	jf = get_file("default_tradmodel_0.0.1.json")
+	hf = get_file("default_tradmodel_0.0.1.h5")	
+	tm.load(jf, hf)
 	defaultmodel = tm
 	return defaultmodel
 	

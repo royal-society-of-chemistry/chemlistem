@@ -1,3 +1,9 @@
+import urllib.request
+import shutil
+import sys
+import os
+from datetime import datetime
+
 def tobits(bit, bits):
 	"""Make a one-high encoding.
 	
@@ -127,5 +133,17 @@ def bio_to_sobie(seq):
 			outseq.append("O")
 	return outseq
 
-
-	
+def get_file(filename):
+	dir = os.path.expanduser(os.path.join("~", ".chemlistem"))
+	if not os.path.exists(dir): os.makedirs(dir)
+	f = os.path.join(dir, filename)
+	if os.path.exists(f): return f
+	origin = "https://bitbucket.org/rscapplications/chemlistem/downloads/"
+	url = origin + filename
+	tmpf = os.path.join(dir, "tmp")
+	print("Fetching", url, "at", datetime.now(), file=sys.stderr)
+	with urllib.request.urlopen(url) as resp, open(tmpf, "wb") as outf:
+		shutil.copyfileobj(resp, outf)
+	os.rename(tmpf, f)
+	print("Fetched", url, "at", datetime.now(), file=sys.stderr)
+	return f
