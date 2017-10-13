@@ -160,6 +160,10 @@ the results in the final evaluation, and at any rate is outperfomed by the ensem
 7. In training, we found that our models gave slightly higher F scores than before. The minimalist model gave an F of 0.8678 (c.f. 0.8664
 from the paper) and the traditional model gave an F of 0.8725 (c.f. 0.8707 from the paper).
 
+## BioCreative VI
+
+This repository also contains the source code for our entry in BioCreative VI Task 5, in the subdirectory cl_bc6_chemprot
+
 ## Conclusion
 
 ChemListem has been developed by the Data Science group at the Royal Society of Chemistry.
