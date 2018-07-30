@@ -68,8 +68,8 @@ featres = { "char": re.compile("^.*[A-Za-z].*$"),
 			"singleupper": re.compile("^[A-Z]$"),
 			"2uc": re.compile("^.*[A-Z][A-Z].*$"),
 			"d_and_c": re.compile("^.*([A-Za-z].*[0-9]|[0-9].*[A-Za-z]).*$"),
-			"num": re.compile("^-?[0-9]+(\\.[0.9]+)?$"),
-			"pc": re.compile("^-?[0-9]+(\\.[0.9]+)?%$")
+			"num": re.compile("^-?[0-9]+(\\.[0-9]+)?$"),
+			"pc": re.compile("^-?[0-9]+(\\.[0-9]+)?%$")
 		}
 frk = sorted(featres.keys())
 
@@ -103,7 +103,7 @@ class Featurizer(object):
 	named entity or not. Most notable - output from a Random Forest.
 	"""
 
-	def __init__(self, train=None, model=None):
+	def __init__(self, train=None, model=None, extrachem=None):
 		"""
 		Train the Featurizer, or 
 		
@@ -111,6 +111,7 @@ class Featurizer(object):
 			train: if not None, the training sequences from corpusreader
 			model: if not None, a text file or JSON object produced by the Featurizer
 		"""
+		self.extrachem = extrachem
 		self._load_dicts()
 		
 		if train is not None:
@@ -265,17 +266,17 @@ class Featurizer(object):
 					self.chebinames.add(tok)
 					self.chebinamesl.add(tok.lower())
 				if len(ct.getTokenStringList()) == 1: self.chebinameswl.add(l.lower())
-		# We're not using ChemSpider here, it makes distribution easier
-		#self.chemspider = set()
-		#self.chemspiderl = set()				
-		#f = open("cs.txt", "r", encoding="utf-8", errors="replace")
-		#for l in f:
-		#	l=l.strip()
-		#	if len(l) > 0:
-		#		ct = ChemTokeniser(l)
-		#		for tok in ct.getTokenStringList():
-		#			self.chemspider.add(tok)
-		#			self.chemspiderl.add(tok.lower())
+		if self.extrachem is not None:
+			self.chemspider = set()
+			self.chemspiderl = set()
+			f = open(extrachem, "r", encoding="utf-8", errors="replace")
+			for l in f:
+				l=l.strip()
+				if len(l) > 0:
+					ct = ChemTokeniser(l)
+					for tok in ct.getTokenStringList():
+						self.chemspider.add(tok)
+						self.chemspiderl.add(tok.lower())
 		
 	
 	def to_json_obj(self):
@@ -409,11 +410,11 @@ class Featurizer(object):
 			if featres[featre].match(tok): rf_feats.append("re="+featre)
 		if tok in self.usdw: rf_feats.append("dict=usdw")
 		if tok in self.chebinames: rf_feats.append("dict=chebi")
-		#if tok in self.chemspider: rf_feats.append("dict=cs")
+		if self.extrachem is not None and tok in self.chemspider: rf_feats.append("dict=cs")
 		if tok.lower() in self.usdwl: rf_feats.append("dict=usdwl")
 		if tok.lower() in self.chebinamesl: rf_feats.append("dict=chebil")
 		if tok.lower() in self.chebinameswl: rf_feats.append("dict=chebiwl")
-		#if tok.lower() in self.chemspiderl: rf_feats.append("dict=csl")
+		if self.extrachem is not None and tok.lower() in self.chemspiderl: rf_feats.append("dict=csl")
 
 		# Not strictly speaking "true" numerical features, but include them here because
 		# we want to pass them direct to the neural net

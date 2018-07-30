@@ -58,23 +58,23 @@ class CorpusReader(object):
 		f.close()
 		
 		print("Read train seqs at", datetime.now())
-		self.split_on_boundaries = False
+		self.split_on_boundaries = True
 		self.trainseqs = []
 		for l in trainlines:
 			ll = l.strip().split("\t")
 			t1 = (ll[0], "T")
 			t2 = (ll[0], "A")
-			self.trainseqs.append(self._toBIO(ll[1], t1, False))
-			self.trainseqs.append(self._toBIO(ll[2], t2, False))
+			self.trainseqs.append(self._toBIO(ll[1], t1, True))
+			self.trainseqs.append(self._toBIO(ll[2], t2, True))
 		print("Read test seqs at", datetime.now())
-		self.split_on_boundaries = True
+		self.split_on_boundaries = False
 		self.testseqs = []
 		for l in testlines:
 			ll = l.strip().split("\t")
 			t1 = (ll[0], "T")
 			t2 = (ll[0], "A")
-			self.testseqs.append(self._toBIO(ll[1], t1, True))
-			self.testseqs.append(self._toBIO(ll[2], t2, True))
+			self.testseqs.append(self._toBIO(ll[1], t1, False))
+			self.testseqs.append(self._toBIO(ll[2], t2, False))
 		print("Corpus read at", datetime.now())
 
 

@@ -6,6 +6,7 @@ import random
 import re
 import json
 import shutil
+from collections import defaultdict
 from datetime import datetime
 from keras.layers.wrappers import Bidirectional, TimeDistributed
 from keras.layers.embeddings import Embedding
@@ -16,6 +17,7 @@ from keras.models import Model, load_model
 import keras.backend as K
 import keras.regularizers
 import numpy as np
+
 
 from .utils import tobits, sobie_scores_to_char_ents, get_file
 from .corpusreader import CorpusReader
@@ -123,6 +125,25 @@ class MiniModelCuDNN(object):
         res = self.predmodel.train_on_batch(tx, [tyf, tyb])
         return res
     
+    def train_autoenc_batch(self, batch):
+        xl = []
+        yl = []
+        for s in batch:
+            cns = [_char_to_num(i) for i in s]
+            yy = [tobits(i, charn) for i in cns]
+            for i in range(len(s)):
+                if random.random() < 0.2:
+                    cns[i] = 0
+                    #cns[i] = random.randint(0,charn-1)
+            xl.append(cns)
+            yl.append(yy)
+        tx = np.array(xl)
+        ty = np.array(yl)
+        #print(tx.shape, tyf.shape, tyb.shape)
+        res = self.autoencmodel.train_on_batch(tx, ty)
+        return res
+        
+    
     def make_dictmodel_batches(self, bsize=32):
         words = set()
         elements = set()
@@ -188,7 +209,7 @@ class MiniModelCuDNN(object):
                 print(n, np.mean(rl), res, datetime.now())
                 rl = []
             
-    def train(self, textfile, annotfile, runname, unsupfile, nunsup=0, unsupfile2=None):
+    def train(self, textfile, annotfile, runname, unsupfile, nunsup=0, unsupfile2=None, cfg=None):
         """
         Train a new MiniModel.
                 
@@ -209,6 +230,9 @@ class MiniModelCuDNN(object):
             annotfile: the filename of the containing the BioCreative training annotations - e.g. "CEMP_BioCreative V.5 training set annot.tsv"
             runname: a string, part of the output filenames.
         """    
+        if cfg is None: cfg = set()
+        print("Config:", cfg)
+        
         # Get training and test sequences
         cr = CorpusReader(textfile, annotfile, charbychar=True)
         train = cr.trainseqs
@@ -248,8 +272,8 @@ class MiniModelCuDNN(object):
         il = Input(shape=(None, ), dtype='int32')
         el = Embedding(charn, 200, name="embed")(il)
         
-        rnn = CuDNNGRU
-        #rnn = CuDNNLSTM
+        #rnn = CuDNNGRU
+        rnn = CuDNNLSTM
         rnn2 = CuDNNLSTM
         
         l1f = rnn(128, return_sequences=True, name="lstmf")(el) # was 128
@@ -283,6 +307,12 @@ class MiniModelCuDNN(object):
         dictmodel.compile(loss='binary_crossentropy', optimizer='rmsprop')
         self.dictmodel = dictmodel
         
+        #aedl = TimeDistributed(Dense(charn, activation="softmax"), name="output")(bl3d)
+        #autoencmodel = Model(inputs=il, outputs=aedl)
+        #autoencmodel.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        #self.autoencmodel = autoencmodel
+        
+        
         self.make_dictmodel_batches()
     
         self.usfn = unsupfile
@@ -294,28 +324,53 @@ class MiniModelCuDNN(object):
         #        self.usl.append(l)
         #self.usb = self.make_str_batches(self.usl, 32)
 
-        
-        if nunsup != 0:
+        self.usb = []
+        if "pre_pre_dict" in cfg:
+            while len(self.dictbatches) > 0:
+                self.train_dictmodel_batch(self.dictbatches.pop())
+
+        if "inter_pred" in cfg:
+            if nunsup == -1: nunsup = 0
+            self.usb = self.get_unsup_batches(nunsup, 32, loopround=False)
+            print(len(self.usb), "batches of unsupervised")            
+                
+        if nunsup != 0 and "pre_pred" in cfg:
             if nunsup == -1: nunsup = 0
             self.usb = self.get_unsup_batches(nunsup, 32, loopround=False)
             print(len(self.usb), "batches of unsupervised")
 
             rl = []
+            arl = []
             maxl = 0
             for n, b in enumerate(self.usb):
-                #if len(b[0]) > maxl:
-                #    maxl = len(b[0])
-                #    print("New max", maxl)
-                #if n < 4000: continue
                 if len(b[0]) > 16384:
                     print("Skipped batch, length", len(b[0]))
                     continue
-                res = self.train_unsup_batch(b)
-                rl.append(res[0])
-                if n % 100 == 0: 
-                    print(n, np.mean(rl), res, datetime.now())
-                    rl = []
+                if False:
+                    res = self.train_autoenc_batch(b)
+                    rl.append(res[0])
+                    arl.append(res[1])
+                else:
+                    res = self.train_unsup_batch(b)
+                    rl.append(res[0])
+                if "inter_pre_dict" in cfg and len(self.dictbatches) > 0:
+                    if len(self.dictbatches) == 1: print("Last Dict", datetime.now())
+                    self.train_dictmodel_batch(self.dictbatches.pop())
+                if n % 100 == 0:
+                    if len(arl) > 0:
+                        print(n, np.mean(rl), np.mean(arl), res, datetime.now())                       
+                        rl = []
+                        arl = []
+                    else:
+                        print(n, np.mean(rl), res, datetime.now())
+                        rl = []
 
+        if "pre_dict" in cfg or "inter_pre_dict" in cfg:
+            print("Train", len(self.dictbatches), "Dict at", datetime.now())
+            while len(self.dictbatches) > 0:
+                self.train_dictmodel_batch(self.dictbatches.pop())
+            print("Dict trained at", datetime.now())
+                        
         if unsupfile2 is not None:
             self.usfn = unsupfile2
             self.usf = open(self.usfn, "r", encoding="utf-8")
@@ -349,7 +404,10 @@ class MiniModelCuDNN(object):
             if epoch > 4: random.shuffle(sizes) # For unknown reasons we can't train on a single token (i.e. character)
             for size in sizes:
                 if size == 1: continue
-                if len(self.dictbatches) > 0:
+                if "inter_pred" in cfg and len(self.usb) > 0:
+                    if len(self.usb) == 1: print("Last Unsup", datetime.now())
+                    self.train_unsup_batch(self.usb.pop())
+                if "inter_dict" in cfg and len(self.dictbatches) > 0:
                     if len(self.dictbatches) == 1: print("Last Dict", datetime.now())
                     self.train_dictmodel_batch(self.dictbatches.pop())
                 batch = train_l_d[size]
@@ -420,7 +478,7 @@ class MiniModelCuDNN(object):
         self.model = load_model(mfile)
         print("Minimalist Model read at", datetime.now(), file=sys.stderr)
         
-    def process(self, str, threshold=0.5, domonly=True):
+    def process(self, str, threshold=0.5, domonly=True, logf=None):
         """
         Find named entities in a string.
         
@@ -450,4 +508,39 @@ class MiniModelCuDNN(object):
         for ent in pents:
             results.append((ent[1], ent[2], str[ent[1]:ent[2]], pxe[ent]["score"], pxe[ent]["dom"]))
         return results
+    
+    def _str_to_seq(self, s):
+        seq = {}
+        seq["tokens"] = list(s)
+        seq["str"] = s
+        seq["tokstart"] = [i for i in range(len(s))]
+        seq["tokend"] = [i+1 for i in range(len(s))]
+        seq["wordn"] = [_char_to_num(i) for i in seq["tokens"]]
+        return seq
+    
+    def batchprocess(self, instrs, threshold=0.5, domonly=True):
+        pairs = [(n, self._str_to_seq(i)) for n, i in enumerate(instrs)]
+        seqs = [i[1] for i in pairs]        
+        seq_l_d = defaultdict(lambda: [])
+        res = [list() for i in instrs]
+        for pair in pairs:
+            seq = pair[1]
+            l = len(seq["tokens"])
+            seq_l_d[len(seq["tokens"])].append(pair)
+        for l in seq_l_d:
+            if l == 0:
+                continue
+            else:
+                ppairs = seq_l_d[l]
+                mm = self.model.predict([np.array([p[1]["wordn"] for p in ppairs])])
+                for n, p in enumerate(ppairs):
+                    p[1]["tagfeat"] = mm[n]
+                    pents, pxe = sobie_scores_to_char_ents(p[1], threshold, p[1]["str"])
+                    if domonly:
+                        pents = [i for i in pents if pxe[i]["dom"]]
+                    rr = []
+                    for ent in pents:
+                        rr.append((ent[1], ent[2], p[1]["str"][ent[1]:ent[2]], pxe[ent]["score"], pxe[ent]["dom"]))
+                    res[p[0]] = rr
+        return res
 
