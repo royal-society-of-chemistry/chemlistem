@@ -51,13 +51,13 @@ def makeSentences(tokens):
 			if next != None and prev != None:
 				nextStr = next.value
 				prevStr = prev.value
-				if value == "\"" and prevStr not in splitTokens:
+				if value == "\"" and prevStr not in _splitTokens:
 					split = False
 				elif prevStr in _impossibleAfter:
 					split = False
 				elif nextStr in _impossibleBefore:
 					split = False
-				elif nextStr in splitTokens:
+				elif nextStr in _splitTokens:
 					split = False
 				elif _lowerRe.match(nextStr):
 					split = False
