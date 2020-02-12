@@ -5,8 +5,8 @@ deep learning, as implemented using the [keras](https://keras.io/) package, to d
 [scikit-learn](http://scikit-learn.org/stable/), [h5py](http://www.h5py.org/) and [numpy](http://www.numpy.org/), and has pre-trained
 models that require the use of [TensorFlow](https://www.tensorflow.org/).
 
-ChemListem is written in Python 3, and is known to be compatible with __Python 3.5__ and __Python 3.6__. It has been tested
-on Windows 10, and Ubuntu 14.
+ChemListem is written in Python 3, and is known to be compatible with __Python 3.5__, __Python 3.6__ and __Python 3.7__. It has been tested
+on Windows 10, and Ubuntu 14. It does not work with Python 2.
 
 ## Installation
 
@@ -21,16 +21,22 @@ tensorflow, and occasional version compatibility issues...
 ### Installing dependencies
 
 The dependencies for ChemListem can sometimes be hard to install, especially on Windows. Keras depends upon either 
-[Theano](https://github.com/Theano) or [TensorFlow](https://www.tensorflow.org/) which in turn depend upon BLAS.
+[Theano](https://github.com/Theano) or [TensorFlow](https://www.tensorflow.org/) which in turn depend upon BLAS. There are
+also many issues with version incompatibilities.
 
-At the time of writing there is a problem with the latest version of tensorflow - 1.11. We have found that using tensorflow 1.10 
+On Linux, on 12 February 2000, we have tested ChemListem with a fresh install of Anaconda3-2019.10-Linux-x86_64 - this uses
+Python 3.7, tensorflow version 1.15.0 (not tensorflow 2.0) and keras version 2.2.4. This appears to work, but produces more
+warnings than it used to. At the time of writing there is an incompatibility between tensorflow and Python 3.8, so it may not
+be possible to get ChemListem to work under Python 3.8.
 
-We have found that the [WinPython](http://winpython.github.io/) distribution, which contains pre-built versions of the dependencies,
-works well on Windows. The following procedure had previously been found to work, but may need updating:
+We have previously found that the [WinPython](http://winpython.github.io/) distribution, which contains pre-built versions of the
+dependencies, works well on Windows. The following procedure had previously been found to work, but may need updating:
 
 1. Obtain WinPython 3.5.3.1Qt5-64bit, and install it.
 2. Update the keras package, using `pip install --upgrade --no-deps keras`
 3. Install ChemListem
+
+It may be that using Anaconda on Windows is a better approach for getting the dependencies - we have not investigated this.
 
 The pre-trained models for chemlistem were trained using the TensorFlow backend. If you are already using keras, then ensure
 that keras is set up to use TensorFlow - alternatively, if you need to use Theano, consider compiling your own model files (see
