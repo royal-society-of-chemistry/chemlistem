@@ -8,6 +8,17 @@ models that require the use of [TensorFlow](https://www.tensorflow.org/).
 ChemListem is written in Python 3, and is known to be compatible with __Python 3.5__ and __Python 3.6__. It has been tested
 on Windows 10, and Ubuntu 14.
 
+### EDIT
+
+This package is no longer actively maintained. The state of the art has moved on and in 2024 is far in advance of when ChemListem was
+developed. This package is kept here for historical academic interest and to provide the source code so that the relevant papers can
+be understood correctly, in case the relevant underlying techniques aren't entirely obsolete. Also the underlying libraries have moved
+on and the latest versions may not be compatible with this code base. Also, the tokeniser may continue to be of interest long after
+everything else in the package has become obsolete, despite (or because of) it being the oldest custom component in the package.
+
+People interesting in the state of the art might look at comparisons such as 
+[this](https://paperswithcode.com/sota/named-entity-recognition-on-bc5cdr-chemical) which keep track of evaluations on relevant corpora. 
+
 ## Installation
 
 ChemListem may be installed from the PyPI via pip:
